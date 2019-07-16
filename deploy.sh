@@ -2,7 +2,7 @@
 
 # ----------------------
 # KUDU Deployment Script
-# Version: 1.0.17
+# Version: 1.0.16
 # ----------------------
 
 # Helpers
@@ -69,7 +69,7 @@ fi
 
 selectNodeVersion () {
   if [[ -n "$KUDU_SELECT_NODE_VERSION_CMD" ]]; then
-    SELECT_NODE_VERSION="$KUDU_SELECT_NODE_VERSION_CMD \"$DEPLOYMENT_SOURCE\" \"$DEPLOYMENT_TARGET\" \"$DEPLOYMENT_TEMP\""
+    SELECT_NODE_VERSION="$KUDU_SELECT_NODE_VERSION_CMD \"$DEPLOYMENT_SOURCE/build\" \"$DEPLOYMENT_TARGET\" \"$DEPLOYMENT_TEMP\""
     eval $SELECT_NODE_VERSION
     exitWithMessageOnError "select node version failed"
 
@@ -102,7 +102,7 @@ echo Handling node.js deployment.
 
 # 1. KuduSync
 if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
-  "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_SOURCE" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.sh"
+  "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_SOURCE/build" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.sh"
   exitWithMessageOnError "Kudu Sync failed"
 fi
 
@@ -128,11 +128,19 @@ if [ -e "$DEPLOYMENT_TARGET/.package.json" ]; then
   cd - > /dev/null
 fi
 
-#5 kudusync
-if [[] "$IN_PLACE_DEPLOYMENT" -NE "1" ]]; then
-  eval $KUDU_SYNC_CMD -v 50 -f "$DEPLOYMENT_SOURCE/build" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.cmd"
-  exitWithMessageOnError "kudusync failed"
-)
+# 4. webpack
+if [ "$DEPLOYMENT_TARGET\webpack.config.js" ]; then
+  cd "$DEPLOYMENT_TARGET"
+  eval $NPM_CMD run webpack
+  exitWithMessageOnError "npm run webpack failed"
+  cd - > /dev/null
+fi
+
+if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
+  "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_SOURCE/build" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.sh"
+  exitWithMessageOnError "Kudu Sync failed"
+fi
+
 
 ##################################################################################################################################
 echo "Finished successfully."
