@@ -28,8 +28,8 @@ steps:
     archiveFile: '$(Build.ArtifactStagingDirectory)/drop/$(Build.BuildId).zip'
     replaceExistingArchive: true
 
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/drop'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/drop'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
