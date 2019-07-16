@@ -120,16 +120,16 @@ fi
 
 # 4. production build
 if [ -e "$DEPLOYMENT_TARGET/.package.json" ]; then
-echo "Building App in $DEPLOYMENT_SOURCE"
-cd "$DEPLOYMENT_TARGET"
-echo "Running $NPM_CMD run build"
-eval $NPM_CMD run build
-exitWithMessageOnError "npm build failed"
-cd - > /dev/null
+  echo "Building App in $DEPLOYMENT_SOURCE"
+  cd "$DEPLOYMENT_TARGET"
+  echo "Running $NPM_CMD run build"
+  eval $NPM_CMD run build
+  exitWithMessageOnError "npm build failed"
+  cd - > /dev/null
 fi
 
 #5 kudusync
-if [ "$IN_PLACE_DEPLOYMENT" NEQ "1" ]
+if [[] "$IN_PLACE_DEPLOYMENT" -NE "1" ]]; then
   eval $KUDU_SYNC_CMD -v 50 -f "$DEPLOYMENT_SOURCE/build" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.cmd"
   exitWithMessageOnError "kudusync failed"
 )
