@@ -20,10 +20,16 @@ steps:
     npm run build
   displayName: 'npm install and build'
 
-- task: AzureWebApp@1
+- task: ArchiveFiles@2
   inputs:
-    azureSubscription: 'Free Trial (8d7481bb-5594-4e3b-9606-8b7a61f4de80)'
-    appType: 'webAppLinux'
-    appName: 'ivman0'
-    package: '$(System.DefaultWorkingDirectory)/build'
-    runtimeStack: 'NODE|10.14'
+    rootFolderOrFile: '$(Build.BinariesDirectory)'
+    includeRootFolder: true
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/drop/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/drop'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
