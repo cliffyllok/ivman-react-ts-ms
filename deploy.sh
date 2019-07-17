@@ -129,9 +129,18 @@ if [ -e "$DEPLOYMENT_TARGET/.package.json" ]; then
 fi
 
 # 4. webpack
-if [ "$DEPLOYMENT_TARGET\webpack.config.js" ]; then
+if [ -e "$DEPLOYMENT_TARGET/web.config.js" ]; then
   cd "$DEPLOYMENT_TARGET"
   eval $NPM_CMD run webpack
+  exitWithMessageOnError "npm run webpack failed"
+  cd - > /dev/null
+fi
+
+# 5. copy web.config
+if [ -e "$DEPLOYMENT_SOURCE/web.config" ]; then
+  cd "$DEPLOYMENT_TARGET"
+  WEB_CONFIG="$DEPLOYMENT_TARGET/web.config"
+  eval cp "$WEB_CONFIG" "$DEPLOYMENT_TARGET/build/"
   exitWithMessageOnError "npm run webpack failed"
   cd - > /dev/null
 fi
